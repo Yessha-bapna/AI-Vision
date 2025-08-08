@@ -1,112 +1,167 @@
+# 🚨 Railway Criminal Tracker System
 
-# 🔒 Face Recognition Access Control System
-
-This project uses your webcam and face recognition to grant or deny access. It detects faces in real-time and checks them against known images in a folder. If your face matches, you get **Access Granted**, otherwise **Access Denied** is shown.
-
----
-
-## 🧠 Features
-
-- Real-time face detection and recognition using webcam.
-- Easy to add new known faces by uploading images.
-- Grants or denies access based on match confidence.
+This project is a full-stack face recognition system for tracking criminals using CCTV and document uploads. It consists of a Flask backend for face extraction and tracking, and a Streamlit frontend for user interaction.
 
 ---
 
-## 🗂️ Folder Structure
+## 📁 Folder Structure
 
 ```
-project/
+FaceDetectionSystem/
 │
-├── known_faces/           # Store reference images here (e.g. John.jpg, Alice.png)
-├── face_unlock.py         # Main Python script
-├── README.md              # This file
+├── Backend/
+│   ├── app.py                # Flask backend server
+│   ├── face_utils.py         # Face recognition and activity tracking logic
+│   ├── pdf_parser.py         # PDF/image face extraction utilities
+│   ├── known_faces/          # Stores extracted/known face images
+│   └── __pycache__/          # Python cache files
+│
+├── Frontend/
+│   ├── app.py                # Streamlit frontend app
+│   └── requirements.txt      # Frontend dependencies
+│
+├── README.md                 # This file
+├── .gitignore                # Git ignore rules
 ```
 
 ---
 
-## ⚙️ Requirements
+## 🖥️ Prerequisites
 
 - Python 3.8+
-- OpenCV
-- face_recognition (built on dlib)
-- dlib (C++ dependency)
+- Webcam (for CCTV tracking)
+- pip (Python package manager)
+- CMake & Visual C++ Build Tools (for dlib, see below)
 
 ---
 
-## 🧩 Python Package Installation
+## ⚙️ Step 1: Clone the Repository
 
 ```bash
-pip install opencv-python face_recognition
+git clone <your-repo-url>
+cd FaceDetectionSystem
 ```
 
 ---
 
-## 🛠️ Installing CMake and C++ Build Tools (Important for dlib)
+## 🛠️ Step 2: Create and Activate Virtual Environments
 
-> These are required to compile dlib, which is used by `face_recognition`.
+**It is recommended to use separate virtual environments for Backend and Frontend.**
 
-### 🔧 Step-by-Step Setup on Windows
+### Backend
 
-#### ✅ 1. Download and Install CMake
+```bash
+cd Backend
+python -m venv venv
+venv\Scripts\activate   # On Windows
+# Or
+source venv/bin/activate  # On Mac/Linux
+```
 
-- Go to: [https://cmake.org/download/](https://cmake.org/download/)
-- Download the **Windows Installer (64-bit)** version.
-- During installation, make sure to **check the box that says "Add CMake to system PATH for all users"**.
+### Frontend
 
-#### ✅ 2. Download and Install Visual C++ Build Tools
+Open a new terminal:
 
-- Go to: [https://visualstudio.microsoft.com/visual-cpp-build-tools/](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-- Download the **Build Tools for Visual Studio**.
-- During the installation, check the following workloads:
-  - ✅ **C++ build tools**
-  - ✅ **Windows 10 SDK**
-  - ✅ **C++ CMake tools for Windows**
+```bash
+cd Frontend
+python -m venv venv
+venv\Scripts\activate   # On Windows
+# Or
+source venv/bin/activate  # On Mac/Linux
+```
 
-> These are necessary to compile and run `dlib` and `face_recognition`.
+---
 
-#### 🔁 3. Restart Your Computer
+## 📦 Step 3: Install Dependencies
 
-> Restarting helps your system register the new environment variables and tools.
+### Backend
 
-#### 💡 4. Install dlib
+Install required packages:
 
-After reboot, open your terminal or command prompt and run:
+```bash
+pip install flask opencv-python face_recognition pdf2image pytesseract Pillow mediapipe
+```
+
+> **Note:** You may need to install `dlib` separately.  
+> See instructions below if you encounter errors.
+
+### Frontend
+
+Install dependencies from `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🛠️ Step 4: Install CMake and Visual C++ Build Tools (Windows Only)
+
+These are required for `dlib` and `face_recognition`.
+
+1. **CMake:** [Download here](https://cmake.org/download/)
+2. **Visual C++ Build Tools:** [Download here](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+   - During installation, select:
+     - C++ build tools
+     - Windows 10 SDK
+     - C++ CMake tools for Windows
+
+After installation, restart your computer.
+
+Then install dlib:
 
 ```bash
 pip install dlib
 ```
 
-If everything is set up correctly, it should install without errors.
+---
+
+## 🖼️ Step 5: Prepare Known Faces
+
+- Place images of criminals or known people in `Backend/known_faces/`.
+- You can also upload PDFs or images via the frontend to auto-extract faces.
 
 ---
 
-## 🏁 How to Run
+## 🚀 Step 6: Run the Backend Server
 
-1. Place images of known people in the `known_faces` folder.
-   - File names will be used as names for recognition (e.g. `Yessha.jpg` → "Yessha").
-
-2. Run the Python script:
+In the `Backend` folder and with the venv activated:
 
 ```bash
-python face_unlock.py
+python app.py
 ```
 
-3. A webcam window will appear. When your face is detected:
-   - ✅ If matched → Green box and `Access Granted: YourName`
-   - ❌ If not matched → Red box and `Access Denied`
-
-4. Press `q` to quit.
+- The Flask server will start at `http://localhost:5000`.
 
 ---
 
-## 🧪 Sample known_faces folder:
+## 🌐 Step 7: Run the Frontend App
 
+In the `Frontend` folder and with the venv activated:
+
+```bash
+ python -m streamlit run app.py
 ```
-known_faces/
-├── yessha.jpg
-├── Jeff.jpeg
-```
+
+- The Streamlit app will open in your browser.
+
+---
+
+## 📝 How to Use
+
+1. **Upload Criminal PDF or Image:**  
+   - Use the Streamlit UI to upload a PDF or image containing faces.
+   - The backend will extract faces and save them in `Backend/known_faces/`.
+
+2. **Start CCTV Tracking:**  
+   - Click "Start CCTV Tracking" in the frontend.
+   - The backend will start real-time face and activity tracking using your webcam.
+   - Detected faces are compared against known faces.
+   - Activities (e.g., raising hand, talking on phone) are logged to `activity_logs.csv`.
+
+3. **View Results:**  
+   - The webcam window will show bounding boxes and labels for detected faces and activities.
+   - Press `q` to quit the webcam window.
 
 ---
 
@@ -114,18 +169,16 @@ known_faces/
 
 | Issue | Solution |
 |-------|----------|
-| `face_recognition` install fails | Ensure CMake and C++ Build Tools are properly installed |
+| `face_recognition`/`dlib` install fails | Ensure CMake and Visual C++ Build Tools are installed |
 | No face detected in known image | Use a clearer image with a single face |
-| Webcam not detected | Make sure it's connected and not being used by another app |
-| `IndexError: list index out of range` | The script tried to encode a face from an image with **no detectable face** |
+| Webcam not detected | Make sure it's connected and not used by another app |
+| `IndexError: list index out of range` | The image may not contain a detectable face |
 
 ---
 
 ## 🤝 Credits
 
-- Built with `face_recognition` by Adam Geitgey  
-- Uses `OpenCV` for real-time video processing  
-- Based on `dlib` for deep face encoding  
-
----
-
+- Built with `face_recognition` by Adam Geitgey
+- Uses `OpenCV` for real-time video processing
+- Based on `dlib` for deep face encoding
+- Activity recognition via `
