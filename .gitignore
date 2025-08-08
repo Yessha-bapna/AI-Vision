@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Virtual Environment
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Streamlit
+.streamlit/
+
+# Temp & Output
+uploads/
+temp/
+*.mp4
+*.avi
+activity_logs.csv
+
+# Jupyter or Notebook
+.ipynb_checkpoints/
+
+# PDFs or test images
+*.pdf
+*.png
+*.jpg
