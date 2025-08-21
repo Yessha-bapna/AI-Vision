@@ -5,3 +5,4 @@ face_recognition
 pdf2image
 pytesseract
 Pillow
+mediapipe
