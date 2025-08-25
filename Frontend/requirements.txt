@@ -1,8 +1,11 @@
 flask
 streamlit
+streamlit-autorefresh
 opencv-python
 face_recognition
 pdf2image
 pytesseract
 Pillow
 mediapipe
+requests
+numpy

@@ -17,7 +17,7 @@ FaceDetectionSystem/
 │   └── __pycache__/          # Python cache files
 │
 ├── Frontend/
-│   ├── app.py                # Streamlit frontend app
+│   ├── app.py                # Streamlit frontend app (UI with live logs + CCTV control)
 │   └── requirements.txt      # Frontend dependencies
 │
 ├── README.md                 # This file
@@ -39,7 +39,6 @@ FaceDetectionSystem/
 
 ```bash
 git clone https://github.com/Yessha-bapna/AI-Vision
-cd FaceDetectionSystem
 ```
 
 ---
@@ -79,7 +78,7 @@ source venv/bin/activate  # On Mac/Linux
 Install required packages:
 
 ```bash
-pip install flask opencv-python face_recognition pdf2image pytesseract Pillow mediapipe
+pip install flask opencv-python face_recognition pdf2image pytesseract Pillow mediapipe requests numpy
 ```
 
 > **Note:** You may need to install `dlib` separately.  
@@ -99,8 +98,8 @@ pip install -r requirements.txt
 
 These are required for `dlib` and `face_recognition`.
 
-1. **CMake:** [Download here](https://cmake.org/download/)
-2. **Visual C++ Build Tools:** [Download here](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+1. **CMake:** [Download here](https://cmake.org/download/)  
+2. **Visual C++ Build Tools:** [Download here](https://visualstudio.microsoft.com/visual-cpp-build-tools/)  
    - During installation, select:
      - C++ build tools
      - Windows 10 SDK
@@ -118,8 +117,9 @@ pip install dlib
 
 ## 🖼️ Step 5: Prepare Known Faces
 
-- Place images of criminals or known people in `Backend/known_faces/`.
-- You can also upload PDFs or images via the frontend to auto-extract faces.
+- Place images of criminals or known people in `Backend/known_faces/`.  
+- You can also upload PDFs or images via the frontend to auto-extract faces.  
+- Faces will be saved automatically into the gallery.
 
 ---
 
@@ -140,27 +140,37 @@ python app.py
 In the `Frontend` folder and with the venv activated:
 
 ```bash
- python -m streamlit run app.py
+python -m streamlit run app.py
 ```
 
-- The Streamlit app will open in your browser.
+- The Streamlit app will open in your browser.  
+- The UI is split into **two panels**:
+  - **Left side:** Upload section (PDFs/Images + CCTV control)  
+  - **Right side:** Live activity logs from CCTV feed  
 
 ---
 
 ## 📝 How to Use
 
 1. **Upload Criminal PDF or Image:**  
-   - Use the Streamlit UI to upload a PDF or image containing faces.
+   - Use the Streamlit UI to upload a PDF or image containing faces.  
    - The backend will extract faces and save them in `Backend/known_faces/`.
 
 2. **Start CCTV Tracking:**  
-   - Click "Start CCTV Tracking" in the frontend.
-   - The backend will start real-time face and activity tracking using your webcam.
-   - Detected faces are compared against known faces.
-   - Activities (e.g., raising hand, talking on phone) are logged to `activity_logs.csv`.
+   - Click **"Start CCTV Tracking"** in the frontend.  
+   - The backend will start real-time face and activity tracking using your webcam.  
+   - Detected **criminals are highlighted in red**, civilians in green.  
 
-3. **View Results:**  
-   - The webcam window will show bounding boxes and labels for detected faces and activities.
+3. **Features Added:**  
+   - Detects **multiple criminals and civilians** simultaneously.  
+   - Gives an **alert when criminals group together** (stand too close).  
+   - Detects activities like **raising hand, talking on phone, idle**, etc.  
+   - Logs are written to `activity_logs.csv`.  
+   - **Live activity logs appear on the dashboard** alongside the CCTV feed.
+
+4. **View Results:**  
+   - Webcam window shows bounding boxes with role & activity.  
+   - Logs stream live in the Streamlit UI.  
    - Press `q` to quit the webcam window.
 
 ---
@@ -173,12 +183,14 @@ In the `Frontend` folder and with the venv activated:
 | No face detected in known image | Use a clearer image with a single face |
 | Webcam not detected | Make sure it's connected and not used by another app |
 | `IndexError: list index out of range` | The image may not contain a detectable face |
+| Logs not updating | Ensure backend is running and `/get_logs` endpoint is reachable |
 
 ---
 
 ## 🤝 Credits
 
-- Built with `face_recognition` by Adam Geitgey
-- Uses `OpenCV` for real-time video processing
-- Based on `dlib` for deep face encoding
-- Activity recognition via `
+- Built with `face_recognition` by Adam Geitgey  
+- Uses `OpenCV` for real-time video processing  
+- Based on `dlib` for deep face encoding  
+- Activity recognition via **MediaPipe**  
+- Frontend powered by **Streamlit**
