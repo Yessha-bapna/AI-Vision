@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 import mediapipe as mp
 import numpy as np
 
+
+LIVE_LOGS = []
+MAX_LOGS = 50   # keep last 50 activities
+
 # -----------------------------
 # Config
 # -----------------------------
@@ -67,6 +71,21 @@ def log_activity(identity, activity, is_criminal):
             w.writerow(["timestamp", "identity", "role", "activity"])
         role = "CRIMINAL" if is_criminal else "CIVILIAN"
         w.writerow([datetime.now().isoformat(), identity, role, activity])
+
+    # ✅ Push to in-memory live logs
+    entry = {
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "identity": identity,
+        "role": "CRIMINAL" if is_criminal else "CIVILIAN",
+        "activity": activity
+    }
+    LIVE_LOGS.append(entry)
+
+    # keep only latest MAX_LOGS
+    if len(LIVE_LOGS) > MAX_LOGS:
+        LIVE_LOGS.pop(0)
+
+
 
 # -----------------------------
 # Activity heuristics (pose)

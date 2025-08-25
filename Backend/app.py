@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from pdf_parser import extract_faces_from_pdf, extract_faces_from_image
-from face_utils import recognize_and_track
+from face_utils import recognize_and_track, LIVE_LOGS
 import threading
 import os
 
@@ -26,11 +26,18 @@ def upload_file():
     return jsonify({"status": "fail", "message": "Unsupported file format"})
 
 
-@app.route('/start_feed')
+@app.route("/start_feed", methods=["GET"])
 def start_feed():
-    thread = threading.Thread(target=recognize_and_track)
-    thread.start()
-    return jsonify({"status": "started", "message": "CCTV tracking started"})
+    def run_camera():
+        recognize_and_track(0)   # <- opens OpenCV window
+
+    t = threading.Thread(target=run_camera, daemon=True)
+    t.start()
+    return jsonify({"message": "🚨 CCTV feed started (check your camera window)"})
+
+@app.route("/get_logs", methods=["GET"])
+def get_logs():
+    return jsonify(LIVE_LOGS)
 
 if __name__ == "__main__":
     app.run(debug=True)
