@@ -22,8 +22,7 @@ GROUP_ALERT_COOLDOWN = 10
 _last_group_alert_time = None
 
 # -----------------------------
-# Setup: MediaPipe Pose (single-person)
-# We'll run it once per person on a cropped ROI -> multi-person overall
+# Setup: MediaPipe Pose
 # -----------------------------
 mp_pose = mp.solutions.pose
 _pose = mp_pose.Pose(
@@ -52,7 +51,6 @@ def load_known_faces(directory=KNOWN_DIR):
         if not encs:
             continue
         encodings.append(encs[0])
-        # label from filename (no extension)
         names.append(os.path.splitext(fn)[0])
     return encodings, names
 
@@ -127,7 +125,6 @@ def recognize_and_track(video_source=0):
     global KNOWN_ENCODINGS, KNOWN_NAMES, _last_group_alert_time
 
     KNOWN_ENCODINGS, KNOWN_NAMES = load_known_faces()
-
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
         raise RuntimeError(f"Cannot open video source {video_source}")
@@ -144,6 +141,7 @@ def recognize_and_track(video_source=0):
         face_encs_small = face_recognition.face_encodings(rgb_small, face_locs_small)
 
         criminal_count = 0
+        civilian_id_counter = 0  # track civilians per frame
 
         for (top, right, bottom, left), enc in zip(face_locs_small, face_encs_small):
             top    = int(top    / RESIZE_RATIO)
@@ -164,6 +162,12 @@ def recognize_and_track(video_source=0):
                         is_criminal = True
                         criminal_count += 1
 
+            # Assign civilian ID if not criminal
+            if not is_criminal:
+                civilian_id_counter += 1
+                name = f"CIVILIAN-{civilian_id_counter}"
+
+            # Pose/Activity detection
             h, w = frame.shape[:2]
             bw, bh = (right - left), (bottom - top)
             pad_x = int(0.5 * bw)
@@ -177,12 +181,12 @@ def recognize_and_track(video_source=0):
             activity = infer_activity_for_face_roi(roi) if roi.size else "Idle"
 
             color = (0, 0, 255) if is_criminal else (0, 200, 0)
-            label = f"{'CRIMINAL' if is_criminal else 'CIVILIAN'} - {name if is_criminal else 'CLEAR'}"
+            label = f"{'CRIMINAL' if is_criminal else name}"
             cv2.rectangle(frame, (left, top), (right, bottom), color, 2)
             cv2.putText(frame, f"{label} | {activity}", (left, max(20, top - 8)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2, cv2.LINE_AA)
 
-            ident = name if is_criminal else "Unknown/Civilian"
+            ident = name
             log_activity(ident, activity, is_criminal)
 
         # --------- GROUP ALERT CHECK ----------
